@@ -1,0 +1,31 @@
+version: '3.8'
+services:
+  aggregator:
+    build: .
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./data:/app
+  publisher:
+    build: ./publisher
+    depends_on:
+      - aggregator
+    environment:
+      - AGGREGATOR_URL=http://aggregator:8080
+version: '3.8'
+services:
+  aggregator:
+    build: .
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./src:/app/src
+      - ./data:/app
+  publisher:
+    image: python:3.11-slim
+    depends_on:
+      - aggregator
+    volumes:
+      - ./publisher:/publisher
+    working_dir: /publisher
+    command: ["sh", "-c", "pip install --no-cache-dir httpx && python main.py"]
