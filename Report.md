@@ -1,9 +1,15 @@
 UJIAN TENGAH SEMESTER
+
+
 Sistem Paralel dan Terdistribusi
 
 
 Nama	: Tengku Rayhan Saputra
+
+
 NIM	: 11221044
+
+
 Kelas	: Sistem Paralel dan Terdistribiusi B
 
 
@@ -14,6 +20,8 @@ Tidak Adanya Jam Global (No Global Clock): Terdapat batasan praktis pada akurasi
 Kegagalan Independen (Independent Failures): Komponen dapat gagal secara independen, sehingga sistem harus mampu menangani kegagalan parsial ini (fault tolerance).
 Keterbukaan (Openness): C&D (Bab 1) juga menekankan Openness, di mana sistem dirancang menggunakan antarmuka standar yang memungkinkannya untuk diekstensi dan berinteroperasi.
 Pada desain Pub-Sub log aggregator, trade-off utamanya adalah antara Kinerja (Performance) vs. Keandalan (Reliability). Untuk reliability tinggi, broker harus menjamin persistence (menyimpan pesan ke disk) sebelum mengirim acknowledgment (ACK). Ini melindungi dari crash failure, namun menambah latency (karena disk I/O). Trade-off lainnya adalah Skalabilitas (Scalability). Arsitektur pub-sub secara inheren lebih skalabel daripada client-server dalam hal jumlah koneksi, tetapi broker itu sendiri bisa menjadi bottleneck yang memerlukan partisi.
+
+
 T2 (Bab 2): Perbandingan Arsitektur Client-Server vs. Publish-Subscribe untuk aggregator. Kapan memilih Pub-Sub? Berikan alasan teknis. 
 C&D (Bab 2) mendefinisikan Client-Server sebagai arsitektur di mana proses dibagi menjadi dua peran: server (penyedia layanan) dan client (peminta layanan). Komunikasi bersifat request-response, seringkali sinkron, dan client harus mengetahui alamat server secara eksplisit. Ini adalah model yang tightly coupled.
 Publish-Subscribe, yang oleh C&D (Bab 6) dan T&vS (Bab 4) dikategorikan sebagai indirect communication atau message-queuing system, adalah arsitektur yang berpusat pada perantara (broker). Publisher mengirimkan event ke broker, dan Subscriber menerima event dari broker.
@@ -27,6 +35,8 @@ Delivery semantics adalah jaminan yang diberikan oleh protokol komunikasi mengen
 At-least-once: Sistem menjamin pesan akan terkirim, tetapi bisa saja terkirim lebih dari satu kali. Ini dicapai dengan mekanisme retry oleh pengirim jika acknowledgment (ACK) tidak diterima. Jika ACK-nya yang hilang, pengirim akan mengirim ulang, menyebabkan duplikasi.
 Exactly-once: Jaminan terkuat, di mana pesan dijamin terkirim dan diproses tepat satu kali. Ini sangat sulit dan mahal diimplementasikan.
 Idempotent Consumer Krusial Dalam sistem praktis, at-least-once adalah jaminan yang paling umum. T&vS (Bab 8) membahas ini dalam konteks Reliable Client-Server Communication. Karena at-least-once pasti menghasilkan duplikasi akibat retry, consumer harus idempoten. Sebuah operasi disebut idempoten jika menjalankannya berkali-kali memberikan hasil yang sama seperti menjalankannya satu kali. Consumer yang idempoten sangat krusial karena ia dapat memproses pesan duplikat tanpa merusak state sistem, biasanya dengan cara mendeteksi dan mengabaikan duplikat tersebut.
+
+
 T4 (Bab 4): Rancang Skema penamaan untuk topic dan event_id (unik, collision-resistant). Jelaskan dampaknya terhadap dedup.
 Penamaan (naming), seperti yang dijelaskan dalam C&D (Bab 9) dan T&vS (Bab 5), adalah aspek krusial untuk menemukan dan mengidentifikasi entitas dalam sistem terdistribusi.
 1. Skema Penamaan topic
@@ -37,6 +47,8 @@ Keuntungan: Skema ini memungkinkan filtering berbasis wildcard (misalnya, berlan
 Tujuan: Harus berupa identifier yang unik secara global (globally unique). T&vS (Bab 5) menyebutnya sebagai Identifiers.
 Pilihan: Pilihan terbaik adalah UUID (Universally Unique Identifier), angka 128-bit yang probabilitas tabrakannya (dua event berbeda memiliki ID yang sama) sangat kecil.
 Dampak terhadap Deduplikasi (Dedup) Event_id yang unik adalah kunci untuk mencapai idempotency (T3) di sisi consumer. Consumer akan memelihara durable store (penyimpanan yang andal) berisi event_id yang telah berhasil diproses. Saat consumer menerima event, ia memeriksa event_id tersebut di store. Jika sudah ada, event tersebut adalah duplikat dan dibuang. Jika belum ada, event diproses, dan event_id-nya dicatat ke store. Tanpa event_id yang unik, deduplikasi tidak mungkin dilakukan.
+
+
 T5 (Bab 5): Kapan total ordering tidak diperlukan? Usulkan pendekatan praktis (mis. Event timestamp + monotonic counter) dan batasannya.
 Total ordering, sebuah konsep yang dibahas dalam C&D (Bab 10) dan T&vS (Bab 6), adalah jaminan bahwa semua proses dalam sistem akan mengirimkan (menerima) semua pesan dalam urutan global yang sama persis. Ini sulit dicapai dan memerlukan algoritma konsensus.
 Kapan Total Ordering Tidak Diperlukan? Untuk log aggregator, total ordering seringkali tidak diperlukan. Log dari layanan yang berbeda (misal, service A dan service B) biasanya independen. Yang lebih penting adalah causal ordering (urutan sebab-akibat) atau per-source ordering, di mana event dari satu sumber producer diproses sesuai urutan terjadinya.
@@ -44,6 +56,8 @@ Pendekatan Praktis dan Batasannya: Pendekatan praktis bisa menggunakan Logical C
 Event Timestamp (dari Jam Fisik): Setiap event diberi timestamp oleh producer.
 Monotonic Counter (per Producer): Setiap producer menyertakan sequence number (nomor urut) yang selalu naik.
 Batasan utamanya adalah clock skew, sebuah tantangan fundamental yang juga dibahas dalam C&D (Bab 10) mengenai Time and Global States. Jam fisik di host yang berbeda tidak pernah sinkron sempurna, sehingga timestamp fisik hanya baik untuk pengurutan perkiraan. Sequence number memberikan jaminan urutan yang kuat, tetapi hanya dalam lingkup satu producer.
+
+
 T6 (Bab 6): identifikasi failure modes (duplikasi, out-of-order, crash) Jelaskan strategi mitigasi (retry, backoff, durable dedup store) 
 C&D (Bab 15) dan T&vS (Bab 8) mendefinisikan beberapa model kegagalan (failure modes) yang relevan:
 Crash Failure: Sebuah proses berhenti beroperasi secara tiba-tiba (fail-stop).
@@ -54,10 +68,13 @@ Masking Crash/Omission Failures (Retry & Backoff): Untuk mengatasi kegagalan pen
 Masking Duplikasi (Durable Dedup Store): Seperti dibahas di T4, consumer yang idempoten menggunakan durable store untuk mencatat event_id.
 Masking Out-of-Order (Sequence Numbers): Consumer dapat menggunakan buffer dan sequence number (T5) untuk menyusun ulang pesan sebelum diproses.
 Strategi reliable communication ini dibahas mendalam di T&vS (Bab 8).
+
+
 T7 (Bab 7): Definisikan Eventual Consistency pada aggregator; Jelaskan bagaimana idempotency + dedup membantu mencapai konsistensi
 Eventual Consistency (Konsistensi Pada Akhirnya), seperti yang dikategorikan dalam C&D (Bab 14) dan T&vS (Bab 7), adalah salah satu model konsistensi data-sentris (data-centric consistency model). Model ini menjamin bahwa jika tidak ada pembaruan baru, pada akhirnya semua replika (salinan) data akan konvergen ke nilai yang sama.
 Dalam konteks log aggregator, ini berarti storage akhir mungkin tidak langsung merefleksikan log yang baru saja dikirim (inconsistency window). Namun, sistem menjamin bahwa pada akhirnya, storage tersebut akan berisi satu salinan yang benar dari setiap log. Ini adalah trade-off yang diterima untuk mendapatkan availability dan performance yang tinggi, sebuah konsep inti dalam replication (T&vS, Bab 7).
 Bagaimana Idempotency + Dedup Membantu: Dalam sistem at-least-once (T3), duplikasi pesan tidak terhindarkan. Jika consumer tidak idempoten, replika data tidak akan pernah konvergen ke keadaan yang benar. Idempotency (yang dicapai melalui deduplikasi) adalah mekanisme yang memastikan konvergensi. Dengan menyaring duplikat, consumer memastikan setiap event logis hanya diproses satu kali, sehingga data store akhir akan mencapai keadaan yang konsisten (pada akhirnya).
+
 
 T8 (Bab 1–7): Metrik Evaluasi Sistem (throughput, latency, duplicate rate) dan Kaitan ke Keputusan Desain
 Metrik utama untuk mengevaluasi log aggregator berfokus pada tujuan desain sistem terdistribusi, seperti yang ditetapkan dalam C&D (Bab 1) dan T&vS (Bab 1):
@@ -78,12 +95,16 @@ Kaitan: Ini adalah trade-off untuk mendapatkan Throughput dan Availability yang 
 
 
 1. Deskripsi Proyek
+
+
 proyek ini merupakan implementasi sistem Event Aggregator asynchronous berbasis FastAPI yang dikembangkan untuk demonstrasi konsep distributed systems dan event-driven architecture.
 Sistem ini dirancang untuk menerima, memproses, dan menyimpan event dari berbagai sumber dengan pendekatan deduplication untuk memastikan tidak terjadi pemrosesan data duplikat.
 
 Tujuan utama proyek ini adalah menunjukkan kemampuan integrasi teknologi modern seperti asynchronous I/O, queue-based processing, dan containerization dalam membangun sistem yang efisien, scalable, dan fault-tolerant.
 
 2. Teknologi yang Digunakan
+
+
 Teknologi	Deskripsi
 FastAPI	Framework web modern berbasis Python untuk membangun RESTful API dengan performa tinggi
 Uvicorn	ASGI server untuk menjalankan aplikasi FastAPI dengan dukungan asynchronous
