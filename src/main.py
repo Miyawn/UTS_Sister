@@ -153,6 +153,42 @@ async def get_stats():
         "topics": topics,
         "uptime": uptime,
     }
+
+
+@app.post("/_demo/generate")
+async def demo_generate(topic: Optional[str] = "demo", n: int = 100, dupe_rate: float = 0.2):
+    """Generate `n` events and enqueue them locally. Dupe rate between 0.0-1.0."""
+    if n <= 0:
+        raise HTTPException(status_code=400, detail="n must be > 0")
+    if not 0.0 <= dupe_rate <= 1.0:
+        raise HTTPException(status_code=400, detail="dupe_rate must be between 0 and 1")
+
+    from random import random, randint
+    ids = []
+    accepted = 0
+    for i in range(n):
+        if ids and random() < dupe_rate:
+            eid = str(ids[randint(0, len(ids) - 1)])
+        else:
+            eid = str(i)
+            ids.append(eid)
+        ev = {
+            "topic": topic,
+            "event_id": eid,
+            "timestamp": datetime.utcnow().isoformat(),
+            "source": "_demo",
+            "payload": {"seq": i},
+        }
+        # reuse publish logic: basic validation + enqueue
+        stats["received"] += 1
+        try:
+            await store.increment_stat("received", 1)
+        except Exception:
+            logger.exception("Failed to increment received in DB")
+        await app.state.queue.put(ev)
+        accepted += 1
+
+    return {"generated": n, "accepted": accepted, "dupe_rate": dupe_rate}
 import asyncio
 import time
 from datetime import datetime

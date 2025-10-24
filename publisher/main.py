@@ -30,7 +30,10 @@ def main():
         ev = gen_event("topic-1", eid)
         try:
             resp = client.post(f"{AGG}/publish", json=ev)
-            print(i, resp.status_code)
+            if resp.status_code != 200:
+                print(i, resp.status_code, resp.text)
+            else:
+                print(i, resp.status_code)
         except Exception as e:
             print("error", e)
         sent += 1
