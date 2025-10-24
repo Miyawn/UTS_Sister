@@ -1,15 +1,9 @@
 UJIAN TENGAH SEMESTER
-
-
 Sistem Paralel dan Terdistribusi
 
 
 Nama	: Tengku Rayhan Saputra
-
-
 NIM	: 11221044
-
-
 Kelas	: Sistem Paralel dan Terdistribusi B
 
 
