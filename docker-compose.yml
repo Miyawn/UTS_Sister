@@ -6,7 +6,9 @@ services:
       - "8080:8080"
     volumes:
       - ./src:/app/src
-      - ./data:/app
+      - ./data:/app/data
+    environment:
+      DEDUP_DB: "/app/data/dedup_store.db"
   publisher:
     build: ./publisher
     depends_on:
