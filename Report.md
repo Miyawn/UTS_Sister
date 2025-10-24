@@ -1,3 +1,5 @@
+https://youtu.be/JfrSn3Igiuc
+
 UJIAN TENGAH SEMESTER
 
 Sistem Paralel dan Terdistribusi
