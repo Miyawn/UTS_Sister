@@ -355,7 +355,7 @@ httpx>=0.24.0
 
 ### 11. Referensi
 
-```json
+```
 Van Steen, M., & Tanenbaum, A. S. (2023). Distributed Systems (4th ed.). Maarten Van Steen.
 https://distributed-systems.net/index.php/books/ds4/
 
